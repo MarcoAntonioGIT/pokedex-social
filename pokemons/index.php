@@ -83,7 +83,6 @@ if ($result_trainers->num_rows > 0) {
 echo "</table>";
 
 // Exibir a Pokédex do treinador clicado e o email
-// Exibir a Pokédex do treinador clicado e o email
 if (isset($_GET['view_trainer_id'])) {
     $view_trainer_id = $_GET['view_trainer_id'];
 
@@ -100,12 +99,17 @@ if (isset($_GET['view_trainer_id'])) {
     $stmt_trainer_pokedex->execute();
     $result_trainer_pokedex = $stmt_trainer_pokedex->get_result();
 
+    // Inicializa variáveis para soma de ataques e defesas
+    $totalAttackTrainer = 0;
+    $totalDefenseTrainer = 0;
+    $countPokemonTrainer = 0;
+
     // Verifica se há resultados
     if ($result_trainer_pokedex->num_rows > 0) {
         // Pegar o email do treinador buscado
         if ($row_pokedex = $result_trainer_pokedex->fetch_assoc()) {
             $searched_trainer_email = $row_pokedex['email']; // Armazena o email do treinador buscado
-            echo "<h2>Pokédex do Treinador: " . $searched_trainer_email . "</h2>";
+            echo "<h2>Pokédex do Treinador: " . htmlspecialchars($searched_trainer_email) . "</h2>";
         }
 
         // Exibir os Pokémon do treinador
@@ -122,25 +126,42 @@ if (isset($_GET['view_trainer_id'])) {
                     <td>{$row_pokedex['tipo']}</td>
                     <td>{$isLegendary}</td>
                   </tr>";
+            
+            // Soma dos ataques e defesas
+            $totalAttackTrainer += $row_pokedex['Attack'];
+            $totalDefenseTrainer += $row_pokedex['Defense'];
+            $countPokemonTrainer++;
         } while ($row_pokedex = $result_trainer_pokedex->fetch_assoc());
 
         echo "</table>";
+
+        // Calcular médias
+        $averageAttackTrainer = $totalAttackTrainer / $countPokemonTrainer;
+        $averageDefenseTrainer = $totalDefenseTrainer / $countPokemonTrainer;
+
+        echo "<p>Média de Ataque do treinador: " . number_format($averageAttackTrainer, 2) . "</p>";
+        echo "<p>Média de Defesa do treinador: " . number_format($averageDefenseTrainer, 2) . "</p>";
     } else {
-        echo "<h2>Nenhum Pokémon encontrado para este treinador</h2>";
+        echo "<h2>Nenhum Pokémon encontrado para este treinador.</h2>";
     }
 
     $stmt_trainer_pokedex->close();
 }
 
 
+
 // Tabela de Pokémon do treinador
 echo "<h2>Sua Pokédex</h2>";
-echo "<table border='1'>";
-echo "<tr>
-        <th><a href='?orderByTreinador=Attack&directionTreinador=$invertDirectionTreinador'>Ataque</a></th>
-        <th><a href='?orderByTreinador=Defense&directionTreinador=$invertDirectionTreinador'>Defesa</a></th>
-        <th>Nome</th><th>Número</th><th>Tipo</th><th>Lendário?</th><th>Excluir</th>
-      </tr>";
+echo "<table border='1'>
+        <tr>
+          <th><a href='?orderByTreinador=Attack&directionTreinador=$invertDirectionTreinador'>Ataque</a></th>
+          <th><a href='?orderByTreinador=Defense&directionTreinador=$invertDirectionTreinador'>Defesa</a></th>
+          <th>Nome</th><th>Número</th><th>Tipo</th><th>Lendário?</th><th>Excluir</th>
+        </tr>";
+
+$totalAttack = 0;
+$totalDefense = 0;
+$countPokemon = 0;
 
 if ($result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
@@ -159,11 +180,25 @@ if ($result->num_rows > 0) {
                     </form>
                 </td>
               </tr>";
+        
+        // Soma dos ataques e defesas
+        $totalAttack += $row['Attack'];
+        $totalDefense += $row['Defense'];
+        $countPokemon++;
     }
+
+    // Calcular médias
+    $averageAttack = $totalAttack / $countPokemon;
+    $averageDefense = $totalDefense / $countPokemon;
+
+    echo "</table>";
+    echo "<p>Média de Ataque: " . number_format($averageAttack, 2) . "</p>";
+    echo "<p>Média de Defesa: " . number_format($averageDefense, 2) . "</p>";
 } else {
     echo "<tr><td colspan='7'>Você ainda não adicionou nenhum Pokémon à sua Pokédex.</td></tr>";
+    echo "</table>";
 }
-echo "</table>";
+
 
 // Exibir todos os Pokémons disponíveis na tabela "pokemon"
 $sql_all = "SELECT pokemon.*, type.text AS tipo 
