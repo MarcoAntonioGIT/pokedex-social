@@ -83,6 +83,7 @@ if ($result_trainers->num_rows > 0) {
 echo "</table>";
 
 // Exibir a Pokédex do treinador clicado e o email
+// Exibir a Pokédex do treinador clicado e o email
 if (isset($_GET['view_trainer_id'])) {
     $view_trainer_id = $_GET['view_trainer_id'];
 
@@ -99,31 +100,38 @@ if (isset($_GET['view_trainer_id'])) {
     $stmt_trainer_pokedex->execute();
     $result_trainer_pokedex = $stmt_trainer_pokedex->get_result();
 
-    // Pegar o email do treinador buscado
-    if ($row_pokedex = $result_trainer_pokedex->fetch_assoc()) {
-        $searched_trainer_email = $row_pokedex['email']; // Armazena o email do treinador buscado
-        echo "<h2>Pokédex do Treinador: " . htmlspecialchars($searched_trainer_email) . "</h2>";
+    // Verifica se há resultados
+    if ($result_trainer_pokedex->num_rows > 0) {
+        // Pegar o email do treinador buscado
+        if ($row_pokedex = $result_trainer_pokedex->fetch_assoc()) {
+            $searched_trainer_email = $row_pokedex['email']; // Armazena o email do treinador buscado
+            echo "<h2>Pokédex do Treinador: " . $searched_trainer_email . "</h2>";
+        }
+
+        // Exibir os Pokémon do treinador
+        echo "<table border='1'>
+                <tr>
+                    <th>Nome</th><th>Número</th><th>Tipo</th><th>Legendário?</th>
+                </tr>";
+        
+        do {
+            $isLegendary = $row_pokedex['Is_legendary'] == 1 ? "Sim" : "Não";
+            echo "<tr>
+                    <td>{$row_pokedex['Name']}</td>
+                    <td>{$row_pokedex['Pokedex_number']}</td>
+                    <td>{$row_pokedex['tipo']}</td>
+                    <td>{$isLegendary}</td>
+                  </tr>";
+        } while ($row_pokedex = $result_trainer_pokedex->fetch_assoc());
+
+        echo "</table>";
+    } else {
+        echo "<h2>Nenhum Pokémon encontrado para este treinador</h2>";
     }
 
-    // Exibir os Pokémon do treinador
-    echo "<table border='1'>
-            <tr>
-                <th>Nome</th><th>Número</th><th>Tipo</th><th>Legendário?</th>
-            </tr>";
-    do {
-        $isLegendary = $row_pokedex['Is_legendary'] == 1 ? "Sim" : "Não";
-        echo "<tr>
-                <td>{$row_pokedex['Name']}</td>
-                <td>{$row_pokedex['Pokedex_number']}</td>
-                <td>{$row_pokedex['tipo']}</td>
-                <td>{$isLegendary}</td>
-              </tr>";
-    } while ($row_pokedex = $result_trainer_pokedex->fetch_assoc());
-
-    echo "</table>";
-    
     $stmt_trainer_pokedex->close();
 }
+
 
 // Tabela de Pokémon do treinador
 echo "<h2>Sua Pokédex</h2>";
