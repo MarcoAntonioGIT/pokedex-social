@@ -10,13 +10,12 @@ if ($conn->connect_error) {
     die("Falha na conexão: " . $conn->connect_error);
 }
 
-$error_message = ''; // Inicializa a variável de mensagem de erro
+$error_message = '';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = $_POST['email'];
     $senha = $_POST['password'];
 
-    // Verifica se o email já está cadastrado
     $sql_check = "SELECT email FROM pessoa WHERE email = ?";
     $stmt_check = $conn->prepare($sql_check);
     $stmt_check->bind_param("s", $email);
@@ -57,16 +56,16 @@ $conn->close();
     <div class="container">
         <h2 class="title">Criar Conta</h2>
         <form action="createuser.php" method="post" class="form">
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" required><br>
+            <label for="email" class="label">Email:</label>
+            <input type="email" id="email" name="email" required class="input"><br>
             
-            <label for="password">Senha:</label>
-            <input type="password" id="password" name="password" required>
+            <label for="password" class="label">Senha:</label>
+            <input type="password" id="password" name="password" required class="input">
             
             <button type="submit" class="button">Criar Conta</button>
         </form>
         <?php if (!empty($error_message)): ?>
-            <p class="error"><?= htmlspecialchars($error_message) ?></p>
+            <p class="error-message"><?= htmlspecialchars($error_message) ?></p>
         <?php endif; ?> 
         <a href="../login/login.php" class="link">Já tem uma conta? Faça login.</a>
     </div>

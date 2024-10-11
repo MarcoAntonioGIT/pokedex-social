@@ -20,7 +20,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $add_id = $_POST['add_id'];
     $id_pessoa = $_SESSION['user_id'];
 
-    // Insere o Pokémon na tabela pessoa_pokemon
     $add_sql = "INSERT INTO pessoa_pokemon (id_pessoa, pokedex_number) VALUES (?, ?)";
     $stmt = $conn->prepare($add_sql);
     $stmt->bind_param("ii", $id_pessoa, $add_id);
@@ -33,7 +32,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->close();
     $conn->close();
 
-    // Redirecionar de volta para a lista de Pokémons
     header("Location: index.php");
     exit();
 }
