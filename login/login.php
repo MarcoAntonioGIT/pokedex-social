@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (isset($_SESSION['user_id'])) {
-    header("Location: index.php");
+    header("Location: ../pokemons/index.php");
     exit();
 }
 
@@ -33,7 +33,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if (password_verify($password, $hash_senha)) {
             $_SESSION['user_id'] = $row['id_pessoa'];
             $_SESSION['email'] = $row['email'];
-            header("Location: index.php");
+            header("Location: ../pokemons/index.php");
             exit();
         } else {
             $error_message = "Senha incorreta!";
