@@ -32,7 +32,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->bind_param("ss", $email, $senha_hash);
 
         if ($stmt->execute()) {
-            header("Location: login.php");
+            header("Location: ../login/login.php");
             exit();
         } else {
             $error_message = "Erro: " . $stmt->error;
@@ -67,7 +67,7 @@ $conn->close();
         </form>
         <?php if (!empty($error_message)): ?>
             <p class="error"><?= htmlspecialchars($error_message) ?></p>
-        <?php endif; ?>
+        <?php endif; ?> 
         <a href="../login/login.php" class="link">Já tem uma conta? Faça login.</a>
     </div>
 </body>

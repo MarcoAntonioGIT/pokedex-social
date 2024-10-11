@@ -62,7 +62,7 @@ echo "<form method='GET'>
       </form>";
 
 $email_search = isset($_GET['email_search']) ? $_GET['email_search'] : '';
-$sql_trainers = "SELECT email FROM pessoa WHERE email LIKE ?";
+$sql_trainers = "SELECT id_pessoa, email FROM pessoa WHERE email LIKE ?";
 $stmt_trainers = $conn->prepare($sql_trainers);
 $search_param = "%{$email_search}%";
 $stmt_trainers->bind_param("s", $search_param);
@@ -74,12 +74,56 @@ echo "<table border='1'>
 
 if ($result_trainers->num_rows > 0) {
     while ($row_trainers = $result_trainers->fetch_assoc()) {
-        echo "<tr><td>{$row_trainers['email']}</td></tr>";
+        // Torna o email clicável, passando o ID da pessoa como parâmetro
+        echo "<tr><td><a href='?view_trainer_id={$row_trainers['id_pessoa']}'>{$row_trainers['email']}</a></td></tr>";
     }
 } else {
     echo "<tr><td>Nenhum treinador encontrado.</td></tr>";
 }
 echo "</table>";
+
+// Exibir a Pokédex do treinador clicado e o email
+if (isset($_GET['view_trainer_id'])) {
+    $view_trainer_id = $_GET['view_trainer_id'];
+
+    // Consulta para obter o email e a pokedex
+    $sql_trainer_pokedex = "SELECT p.email, pokemon.*, type.text AS tipo 
+                            FROM pessoa_pokemon 
+                            JOIN pokemon ON pessoa_pokemon.pokedex_number = pokemon.Pokedex_number
+                            JOIN type ON pokemon.Type = type.id_type
+                            JOIN pessoa p ON pessoa_pokemon.id_pessoa = p.id_pessoa
+                            WHERE pessoa_pokemon.id_pessoa = ?
+                            ORDER BY pokemon.Name";
+    $stmt_trainer_pokedex = $conn->prepare($sql_trainer_pokedex);
+    $stmt_trainer_pokedex->bind_param("i", $view_trainer_id);
+    $stmt_trainer_pokedex->execute();
+    $result_trainer_pokedex = $stmt_trainer_pokedex->get_result();
+
+    // Pegar o email do treinador buscado
+    if ($row_pokedex = $result_trainer_pokedex->fetch_assoc()) {
+        $searched_trainer_email = $row_pokedex['email']; // Armazena o email do treinador buscado
+        echo "<h2>Pokédex do Treinador: " . htmlspecialchars($searched_trainer_email) . "</h2>";
+    }
+
+    // Exibir os Pokémon do treinador
+    echo "<table border='1'>
+            <tr>
+                <th>Nome</th><th>Número</th><th>Tipo</th><th>Legendário?</th>
+            </tr>";
+    do {
+        $isLegendary = $row_pokedex['Is_legendary'] == 1 ? "Sim" : "Não";
+        echo "<tr>
+                <td>{$row_pokedex['Name']}</td>
+                <td>{$row_pokedex['Pokedex_number']}</td>
+                <td>{$row_pokedex['tipo']}</td>
+                <td>{$isLegendary}</td>
+              </tr>";
+    } while ($row_pokedex = $result_trainer_pokedex->fetch_assoc());
+
+    echo "</table>";
+    
+    $stmt_trainer_pokedex->close();
+}
 
 // Tabela de Pokémon do treinador
 echo "<h2>Sua Pokédex</h2>";
@@ -149,6 +193,5 @@ echo "</table>";
 
 // Exibir todos os emails dos treinadores cadastrados
 $stmt->close();
-$stmt_trainers->close();
 $conn->close();
 ?>
