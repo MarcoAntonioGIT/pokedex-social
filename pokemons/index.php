@@ -1,9 +1,5 @@
 <?php
-session_start();
-if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
-    exit();
-}
+include('../login/verifica_sessao.php');
 
 // Conectar ao banco de dados
 $servername = "localhost";
